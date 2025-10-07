@@ -29,3 +29,9 @@ test/e2e/videos/
 
 # ignore Snyk Code scanner files
 .dccache
+
+
+temp/
+.jfrog/
+node_modules/
+package-lock.json
