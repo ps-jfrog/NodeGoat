@@ -81,5 +81,4 @@ jobs:
               run: |
                 jf rt bag ${BUILD_NAME} ${BUILD_ID} 
                 jf rt bce ${BUILD_NAME} ${BUILD_ID}
-                jf rt bad ${BUILD_NAME} ${BUILD_ID}
                 jf rt bp ${BUILD_NAME} ${BUILD_ID}
