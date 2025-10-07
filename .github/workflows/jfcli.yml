@@ -43,6 +43,7 @@ jobs:
 
             - name: "Folder list"
               run: | 
+                  rm -rf node_modules package-lock.json
                   tree .
 
             - name: "JF Show"
