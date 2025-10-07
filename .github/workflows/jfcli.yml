@@ -17,7 +17,7 @@ env:
   DEFAULT_WORKSPACE: "${{github.workspace}}" 
   BUILD_ID: "${{github.run_number}}.0"
   BUILD_NAME: "cwr" # CWR - Curation Waiver Request 
-  REPO_VIRTUAL: "curation-blocked-npm-virtual"  # "curation-blocked-npm-remote" # "curation-blocked-npm-local"
+  REPO_VIRTUAL: "cg-lab-npm" # "curation-blocked-npm-virtual"  # "curation-blocked-npm-remote" # "curation-blocked-npm-local"
 
 jobs:
     waiver: 

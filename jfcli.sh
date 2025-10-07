@@ -1,6 +1,6 @@
-export JF_HOST="psazuse.jfrog.io"  JFROG_CLI_LOG_LEVEL="DEBUG" RT_REPO="curation-blocked-npm-virtual"  # "curation-blocked-npm-remote" # "curation-blocked-npm-local"
+export JF_HOST="psazuse.jfrog.io"  JFROG_CLI_LOG_LEVEL="DEBUG" RT_REPO="cg-lab-npm" # "curation-blocked-npm-virtual"  # "curation-blocked-npm-remote" # "curation-blocked-npm-local"
 
-# Curation Policy Name: Curation-blocked-remote
+# Curation Policy Name: cg-lab-npm
 
 export JF_RT_URL="https://${JF_HOST}" BUILD_NAME="nodegoat" BUILD_ID="cmd.$(date '+%Y-%m-%d-%H-%M')" 
 
