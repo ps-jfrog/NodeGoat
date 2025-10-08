@@ -72,7 +72,11 @@ jobs:
 
             - name: "Curation-Audit"
               run: | 
-                jf ca --format=table --threads=100
+                output=$(jf ca --format=table --threads=100) # Replace with actual command
+                if echo "$output" | grep -q "blocked package"; then # Define your failure condition
+                  echo "::error::Build failed: Build contains blocked packages."
+                  exit 1
+                fi
 
             - name: "NPM Install"
               run: |  
