@@ -21,7 +21,7 @@ env:
 
 jobs:
   caBlockerFail: 
-    name: "CA fail"
+    name: "CA fails if pkg blocked"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -180,7 +180,7 @@ jobs:
               #   ] 
               # }
           run: |
-            WAIVER_PENDING_RESP=$(curl -v -G ${{env.CURL_URL}} -H 'Content-Type:  application/json' -H "Authorization: Bearer ${{steps.setup-cli.outputs.oidc-token}}")
+            WAIVER_PENDING_RESP=$(curl -v -G ${{env.CURL_URL}} -H 'Content-Type:  application/json' -H "Authorization: Bearer ${{steps.jfrog-cli.outputs.oidc-token}}")
             echo $WAIVER_PENDING_RESP > ${{env.RESP_JSON}}
             cat ${{env.RESP_JSON}}
 
@@ -211,6 +211,10 @@ jobs:
               echo "| ${waiver_id} | ${waiver_pkg_name} | ${waiver_pkg_ver} |" >> $GITHUB_STEP_SUMMARY
             done
             echo " " >> $GITHUB_STEP_SUMMARY
+
+        - name: "Exit"
+          run: |  
+            exit 1
 
         - name: "NPM Install"
           run: |  
