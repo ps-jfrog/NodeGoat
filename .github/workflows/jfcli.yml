@@ -20,7 +20,7 @@ env:
   REPO_VIRTUAL: "cg-lab-npm" # "curation-blocked-npm-virtual"  # "curation-blocked-npm-remote" # "curation-blocked-npm-local"
 
 jobs:
-  caFail: 
+  caBlockerFail: 
     name: "CA fail"
     runs-on: ubuntu-latest
     defaults:
@@ -90,7 +90,7 @@ jobs:
             jf rt bp ${BUILD_NAME} ${BUILD_ID}
 
   waiverPendingInfo: 
-    name: "CA fail"
+    name: "Waiver Pending info"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -119,22 +119,6 @@ jobs:
           run: | 
               jf c s
 
-        - name: "Setup Summary"
-          run: |
-            echo "# :frog: Setup Summary :pushpin:" >> $GITHUB_STEP_SUMMARY
-            echo " " >> $GITHUB_STEP_SUMMARY
-            echo " " >> $GITHUB_STEP_SUMMARY
-            echo " - Installed JFrog CLI [$(jf --version)](https://jfrog.com/getcli/) " >> $GITHUB_STEP_SUMMARY
-            echo "    - $(jf --version) " >> $GITHUB_STEP_SUMMARY
-            echo "    - $(npm -v) " >> $GITHUB_STEP_SUMMARY
-            echo "    - $(node -v) " >> $GITHUB_STEP_SUMMARY
-            echo " " >> $GITHUB_STEP_SUMMARY
-            echo " " >> $GITHUB_STEP_SUMMARY
-            echo " Curation Info:" >> $GITHUB_STEP_SUMMARY
-            echo "    - Policy Name: Curation-blocked-remote " >> $GITHUB_STEP_SUMMARY
-            echo "    - Repo-Virtual: ${{env.REPO_VIRTUAL}} " >> $GITHUB_STEP_SUMMARY   
-            echo "    - Repo-remote: curation-blocked-npm-remote " >> $GITHUB_STEP_SUMMARY 
-
         - name: "Create NPM config"
           run: |
             jf npmc --repo-resolve=${{env.REPO_VIRTUAL}} --repo-deploy=${{env.REPO_VIRTUAL}}
@@ -144,10 +128,89 @@ jobs:
             jf ca --format=table --threads=100
         
         - name: "Waiver pending info"
+          env:
+            CURL_URL: "${{env.JF_RT_URL}}/xray/ui/curation/waiver_requests?pkg_type=PyPI&status=pending&num_of_rows=100"
+            RESP_JSON: "WAIVER_PENDING_RESP-${{env.BUILD_ID}}.json"
+              # {
+              #   "data": [
+              #     {
+              #         "id": 8,
+              #         "created_at": "2025-05-14T21:13:39Z",
+              #         "closed_at": "",
+              #         "repo_key": "curation-blocked-remote",
+              #         "pkg_type": "PyPI",
+              #         "pkg_name": "s3transfer",
+              #         "pkg_version": "0.12.0",
+              #         "status": "pending",
+              #         "decision_owners": [
+              #             "admins"
+              #         ],
+              #         "requesters": [
+              #             {
+              #                 "user": "krishnam",
+              #                 "email": "krishnam@jfrog.com",
+              #                 "requested_at": "2025-05-22T15:34:19Z",
+              #                 "justification": "May 22 curation request"
+              #             }
+              #         ],
+              #         "policies": [
+              #             {
+              #                 "id": 41,
+              #                 "name": "curation-waiver-request-policy",
+              #                 "scope": "specific_repos",
+              #                 "policy_action": "block",
+              #                 "condition_id": "34",
+              #                 "condition_name": "block all",
+              #                 "condition_category": "security",
+              #                 "can_approve": true,
+              #                 "pkg_types_include": [
+              #                     "curation-blocked-remote",
+              #                     "krishnam-npm-remote"
+              #                 ],
+              #                 "repo_include": [
+              #                     "curation-blocked-remote",
+              #                     "krishnam-npm-remote"
+              #                 ],
+              #                 "decision_owners": [
+              #                     "admins"
+              #                 ]
+              #             }
+              #         ]
+              #     } 
+              #   ] 
+              # }
           run: |
-            echo "${{steps.jfrog-cli.outputs}}"
+            WAIVER_PENDING_RESP=$(curl -v -G ${{env.CURL_URL}} -H 'Content-Type:  application/json' -H "Authorization: Bearer ${{steps.setup-cli.outputs.oidc-token}}")
+            echo $WAIVER_PENDING_RESP > ${{env.RESP_JSON}}
+            cat ${{env.RESP_JSON}}
 
-            jf curl -XGET ${{env.JF_RT_URL}}/xray/ui/curation/waiver_requests?pkg_type=PyPI&status=pending&num_of_rows=100 -H "Authorization: Bearer ${JF_ACCESS_TOKEN}"
+            echo "# :frog: Waiver Pending Summary :pushpin:" >> $GITHUB_STEP_SUMMARY
+            echo " " >> $GITHUB_STEP_SUMMARY
+            echo " " >> $GITHUB_STEP_SUMMARY
+            echo " - Installed JFrog CLI [$(jf --version)](https://jfrog.com/getcli/) " >> $GITHUB_STEP_SUMMARY
+            echo "    - $(jf --version) " >> $GITHUB_STEP_SUMMARY
+            echo "    - $(npm -v) " >> $GITHUB_STEP_SUMMARY
+            echo "    - $(node -v) " >> $GITHUB_STEP_SUMMARY
+            echo " " >> $GITHUB_STEP_SUMMARY
+            echo " Curation Info:" >> $GITHUB_STEP_SUMMARY
+            echo "    - Policy Name: Curation-blocked-remote " >> $GITHUB_STEP_SUMMARY
+            echo "    - Repo-Virtual: ${{env.REPO_VIRTUAL}} " >> $GITHUB_STEP_SUMMARY   
+            echo "    - Repo-remote: curation-blocked-npm-remote " >> $GITHUB_STEP_SUMMARY 
+            echo " " >> $GITHUB_STEP_SUMMARY
+            echo " Waiver Pending Info:" >> $GITHUB_STEP_SUMMARY
+            echo " | Waiver ID | Package Name | Package version | " >> $GITHUB_STEP_SUMMARY
+            echo " | :--- | :--- | :--- | " >> $GITHUB_STEP_SUMMARY
+              
+            items=$(echo "$WAIVER_PENDING_RESP" | jq -c -r '.data[]')
+            echo ${items}
+            for item in ${items[@]}; do
+              waiver_id=$(echo $item | jq -r '.id')
+              waiver_pkg_name=$(echo $item | jq -r '.pkg_name')
+              waiver_pkg_ver=$(echo $item | jq -r '.pkg_version')
+
+              echo "| ${waiver_id} | ${waiver_pkg_name} | ${waiver_pkg_ver} |" >> $GITHUB_STEP_SUMMARY
+            done
+            echo " " >> $GITHUB_STEP_SUMMARY
 
         - name: "NPM Install"
           run: |  
