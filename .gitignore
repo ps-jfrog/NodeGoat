@@ -35,3 +35,4 @@ temp/
 .jfrog/
 node_modules/
 package-lock.json
+.npmrc
