@@ -23,17 +23,34 @@ echo $WAIVER_PENDING_RESP > ${RESP_JSON}
 
 # items=$(echo "$WAIVER_PENDING_RESP" | jq -c -r '.data[]')
 
-echo " | Waiver ID | Package Name | Package version | "
-echo " | :--- | :--- | :--- | "
+echo " | Waiver ID | Package Name | Package version | Requested on | Justification | Decision Owners | "
+echo " | :--- | :--- | :--- | :--- | :--- | :--- | "
 
 JSON_FILE="${RESP_JSON}"
-jq -c '.data[] | {id, pkg_name, pkg_version}' "$JSON_FILE" | while read -r item; do
+# jq -c '.data[] | {id, pkg_name, pkg_version}' "$JSON_FILE" | while read -r item; do
+
+jq -c '.data[]' "$JSON_FILE" | while read -r item; do
     waiver_id=$(echo "$item" | jq -r '.id')
     pkg_name=$(echo "$item" | jq -r '.pkg_name')
     pkg_version=$(echo "$item" | jq -r '.pkg_version')
 
-    echo " | ${waiver_id} | ${pkg_name} | ${pkg_version} | "
+    decision_owners=$(echo "$item" | jq -r '.decision_owners | join(", ")')
+
+    latest_request=$(echo "$item" | jq -r '.requesters | sort_by(.requested_at) | last')
+    requested_at=$(echo "$latest_request" | jq -r '.requested_at')
+    justification=$(echo "$latest_request" | jq -r '.justification')
+
+    echo " |  ${waiver_id} | ${pkg_name} | ${pkg_version} | ${requested_at} | ${justification} | ${decision_owners} | "
 done
+
+
+
+  
+
+  # Extract the most recent requester (sorted by requested_at)
+  
+
+
 rm -rf WAIVER_PENDING_RESP-*.json
 
 # jf npm install --build-name=$BUILD_NAME --build-number=$BUILD_ID

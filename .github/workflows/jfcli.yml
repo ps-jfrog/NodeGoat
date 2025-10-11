@@ -131,54 +131,6 @@ jobs:
           env:
             CURL_URL: "${{env.JF_RT_URL}}/xray/ui/curation/waiver_requests?pkg_type=PyPI&status=pending&num_of_rows=100"
             RESP_JSON: "WAIVER_PENDING_RESP-${{env.BUILD_ID}}.json"
-              # {
-              #   "data": [
-              #     {
-              #         "id": 8,
-              #         "created_at": "2025-05-14T21:13:39Z",
-              #         "closed_at": "",
-              #         "repo_key": "curation-blocked-remote",
-              #         "pkg_type": "PyPI",
-              #         "pkg_name": "s3transfer",
-              #         "pkg_version": "0.12.0",
-              #         "status": "pending",
-              #         "decision_owners": [
-              #             "admins"
-              #         ],
-              #         "requesters": [
-              #             {
-              #                 "user": "krishnam",
-              #                 "email": "krishnam@jfrog.com",
-              #                 "requested_at": "2025-05-22T15:34:19Z",
-              #                 "justification": "May 22 curation request"
-              #             }
-              #         ],
-              #         "policies": [
-              #             {
-              #                 "id": 41,
-              #                 "name": "curation-waiver-request-policy",
-              #                 "scope": "specific_repos",
-              #                 "policy_action": "block",
-              #                 "condition_id": "34",
-              #                 "condition_name": "block all",
-              #                 "condition_category": "security",
-              #                 "can_approve": true,
-              #                 "pkg_types_include": [
-              #                     "curation-blocked-remote",
-              #                     "krishnam-npm-remote"
-              #                 ],
-              #                 "repo_include": [
-              #                     "curation-blocked-remote",
-              #                     "krishnam-npm-remote"
-              #                 ],
-              #                 "decision_owners": [
-              #                     "admins"
-              #                 ]
-              #             }
-              #         ]
-              #     } 
-              #   ] 
-              # }
           run: |
             WAIVER_PENDING_RESP=$(curl "${{env.CURL_URL}}" -H "Authorization: Bearer ${{steps.jfrog-cli.outputs.oidc-token}}")
             echo $WAIVER_PENDING_RESP > ${{env.RESP_JSON}}
@@ -198,8 +150,9 @@ jobs:
             echo "    - Repo-remote: curation-blocked-npm-remote " >> $GITHUB_STEP_SUMMARY 
             echo " " >> $GITHUB_STEP_SUMMARY
             echo " Waiver Pending Info:" >> $GITHUB_STEP_SUMMARY
-            echo " | Waiver ID | Package Name | Package version | " >> $GITHUB_STEP_SUMMARY
-            echo " | :--- | :--- | :--- | " >> $GITHUB_STEP_SUMMARY
+
+            echo " | Waiver ID | Package Name | Package version | Requested on | Justification | Decision Owners | " >> $GITHUB_STEP_SUMMARY
+            echo " | :--- | :--- | :--- | :--- | :--- | :--- | " >> $GITHUB_STEP_SUMMARY
               
             JSON_FILE="${{env.RESP_JSON}}"
             jq -c '.data[] | {id, pkg_name, pkg_version}' "$JSON_FILE" | while read -r item; do
@@ -207,7 +160,15 @@ jobs:
               pkg_name=$(echo "$item" | jq -r '.pkg_name')
               pkg_version=$(echo "$item" | jq -r '.pkg_version')
 
-              echo " | ${waiver_id} | ${pkg_name} | ${pkg_version} | " >> $GITHUB_STEP_SUMMARY
+              # Extract decision owners (as comma-separated string)
+              decision_owners=$(echo "$item" | jq -r '.decision_owners | join(", ")')
+
+              # Extract most recent requester details
+              latest_request=$(echo "$item" | jq -r '.requesters | sort_by(.requested_at) | last')
+              requested_at=$(echo "$latest_request" | jq -r '.requested_at')
+              justification=$(echo "$latest_request" | jq -r '.justification')
+
+              echo " |  ${waiver_id} | ${pkg_name} | ${pkg_version} | ${requested_at} | ${justification} | ${decision_owners} | " >> $GITHUB_STEP_SUMMARY
             done
             echo " " >> $GITHUB_STEP_SUMMARY
 
