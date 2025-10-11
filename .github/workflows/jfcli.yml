@@ -180,7 +180,7 @@ jobs:
               #   ] 
               # }
           run: |
-            WAIVER_PENDING_RESP=$(curl ${{env.CURL_URL}} -H "Authorization: Bearer ${{steps.jfrog-cli.outputs.oidc-token}}")
+            WAIVER_PENDING_RESP=$(curl "${{env.CURL_URL}}" -H "Authorization: Bearer ${{steps.jfrog-cli.outputs.oidc-token}}")
             echo $WAIVER_PENDING_RESP > ${{env.RESP_JSON}}
             cat ${{env.RESP_JSON}}
 
