@@ -182,7 +182,7 @@ jobs:
           run: |
             WAIVER_PENDING_RESP=$(curl "${{env.CURL_URL}}" -H "Authorization: Bearer ${{steps.jfrog-cli.outputs.oidc-token}}")
             echo $WAIVER_PENDING_RESP > ${{env.RESP_JSON}}
-            cat ${{env.RESP_JSON}}
+            # cat ${{env.RESP_JSON}}
 
             echo "# :frog: Waiver Pending Summary :pushpin:" >> $GITHUB_STEP_SUMMARY
             echo " " >> $GITHUB_STEP_SUMMARY
@@ -201,14 +201,13 @@ jobs:
             echo " | Waiver ID | Package Name | Package version | " >> $GITHUB_STEP_SUMMARY
             echo " | :--- | :--- | :--- | " >> $GITHUB_STEP_SUMMARY
               
-            items=$(echo "$WAIVER_PENDING_RESP" | jq -c -r '.data[]')
-            echo ${items}
-            for item in ${items[@]}; do
-              waiver_id=$(echo $item | jq -r '.id')
-              waiver_pkg_name=$(echo $item | jq -r '.pkg_name')
-              waiver_pkg_ver=$(echo $item | jq -r '.pkg_version')
+            JSON_FILE="${{env.RESP_JSON}}"
+            jq -c '.data[] | {id, pkg_name, pkg_version}' "$JSON_FILE" | while read -r item; do
+              waiver_id=$(echo "$item" | jq -r '.id')
+              pkg_name=$(echo "$item" | jq -r '.pkg_name')
+              pkg_version=$(echo "$item" | jq -r '.pkg_version')
 
-              echo "| ${waiver_id} | ${waiver_pkg_name} | ${waiver_pkg_ver} |" >> $GITHUB_STEP_SUMMARY
+              echo " | ${waiver_id} | ${pkg_name} | ${pkg_version} | " >> $GITHUB_STEP_SUMMARY
             done
             echo " " >> $GITHUB_STEP_SUMMARY
 

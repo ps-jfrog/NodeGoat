@@ -15,4 +15,25 @@ jf npmc --repo-resolve=${RT_REPO} --repo-deploy=${RT_REPO}
 
 jf ca --format=table --threads=100 
 
-jf npm install --build-name=$BUILD_NAME --build-number=$BUILD_ID
+CURL_URL="${JF_RT_URL}/xray/ui/curation/waiver_requests?pkg_type=PyPI&status=pending&num_of_rows=10"
+RESP_JSON="WAIVER_PENDING_RESP-${BUILD_ID}.json"
+
+WAIVER_PENDING_RESP=$(curl "${CURL_URL}" -H "Authorization: Bearer ${JF_ACCESS_TOKEN}")
+echo $WAIVER_PENDING_RESP > ${RESP_JSON}
+
+# items=$(echo "$WAIVER_PENDING_RESP" | jq -c -r '.data[]')
+
+echo " | Waiver ID | Package Name | Package version | "
+echo " | :--- | :--- | :--- | "
+
+JSON_FILE="${RESP_JSON}"
+jq -c '.data[] | {id, pkg_name, pkg_version}' "$JSON_FILE" | while read -r item; do
+    waiver_id=$(echo "$item" | jq -r '.id')
+    pkg_name=$(echo "$item" | jq -r '.pkg_name')
+    pkg_version=$(echo "$item" | jq -r '.pkg_version')
+
+    echo " | ${waiver_id} | ${pkg_name} | ${pkg_version} | "
+done
+rm -rf WAIVER_PENDING_RESP-*.json
+
+# jf npm install --build-name=$BUILD_NAME --build-number=$BUILD_ID

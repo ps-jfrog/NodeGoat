@@ -36,3 +36,4 @@ temp/
 node_modules/
 package-lock.json
 .npmrc
+WAIVER_PENDING_RESP-*.json
