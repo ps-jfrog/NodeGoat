@@ -129,7 +129,7 @@ jobs:
         
         - name: "Waiver pending info"
           env:
-            CURL_URL: "${{env.JF_RT_URL}}/xray/ui/curation/waiver_requests?pkg_type=PyPI&status=pending&num_of_rows=100&direction=asc"
+            CURL_URL: "${{env.JF_RT_URL}}/xray/ui/curation/waiver_requests?pkg_type=npm&status=pending&num_of_rows=100&direction=asc"
             RESP_JSON: "WAIVER_PENDING_RESP-${{env.BUILD_ID}}.json"
             JF_WAIVER_URL: "${{env.JF_RT_URL}}/ui/package-curation/waivers-requests"
           run: |
