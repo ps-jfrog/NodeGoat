@@ -156,8 +156,9 @@ jobs:
             echo " | :--- | :--- | :--- | :--- | :--- | :--- | " >> $GITHUB_STEP_SUMMARY
               
             JSON_FILE="${{env.RESP_JSON}}"
-            jq -c '.data[]' "$JSON_FILE" | while read -r item; do
+            jq -c '.data[]' "$JSON_FILE" | while read -r item; do            
               waiver_id=$(echo "$item" | jq -r '.id')
+              repo_key=$(echo "$item" | jq -r '.repo_key')
               pkg_name=$(echo "$item" | jq -r '.pkg_name')
               pkg_version=$(echo "$item" | jq -r '.pkg_version')
 
@@ -169,7 +170,9 @@ jobs:
               requested_at=$(echo "$latest_request" | jq -r '.requested_at')
               justification=$(echo "$latest_request" | jq -r '.justification')
 
-              echo " |  ${waiver_id} | ${pkg_name} | ${pkg_version} | ${requested_at} | ${justification} | ${decision_owners} | " >> $GITHUB_STEP_SUMMARY
+              if [[ ("${RT_REMOTE}" == "${repo_key}") ]] ; then
+                echo " |  ${waiver_id} | ${pkg_name} | ${pkg_version} | ${requested_at} | ${justification} | ${decision_owners} | " >> $GITHUB_STEP_SUMMARY
+              fi
             done
             echo " " >> $GITHUB_STEP_SUMMARY
 
