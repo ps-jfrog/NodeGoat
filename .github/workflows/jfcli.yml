@@ -143,13 +143,13 @@ jobs:
             echo " " >> $GITHUB_STEP_SUMMARY
             echo " - Installed JFrog CLI [$(jf --version)](https://jfrog.com/getcli/) " >> $GITHUB_STEP_SUMMARY
             echo "    - $(jf --version) " >> $GITHUB_STEP_SUMMARY
-            echo "    - $(npm -v) " >> $GITHUB_STEP_SUMMARY
-            echo "    - $(node -v) " >> $GITHUB_STEP_SUMMARY
+            echo "    - NPM version: $(npm -v) " >> $GITHUB_STEP_SUMMARY
+            echo "    - Node version: $(node -v) " >> $GITHUB_STEP_SUMMARY
             echo " " >> $GITHUB_STEP_SUMMARY
             echo " Curation Info:" >> $GITHUB_STEP_SUMMARY
-            echo "    - Policy Name: Curation-blocked-remote " >> $GITHUB_STEP_SUMMARY
+            echo "    - Policy Name: cg-lab-npm " >> $GITHUB_STEP_SUMMARY
             echo "    - Repo-Virtual: ${{env.REPO_VIRTUAL}} " >> $GITHUB_STEP_SUMMARY   
-            echo "    - Repo-remote: curation-blocked-npm-remote " >> $GITHUB_STEP_SUMMARY 
+            echo "    - Repo-remote: ${{env.REPO_REMOTE}} " >> $GITHUB_STEP_SUMMARY 
             echo " " >> $GITHUB_STEP_SUMMARY
             echo " Waiver Pending Info at [${{env.JF_WAIVER_URL}}](${{env.JF_WAIVER_URL}})" >> $GITHUB_STEP_SUMMARY
 
