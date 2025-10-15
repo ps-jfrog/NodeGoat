@@ -18,6 +18,7 @@ env:
   BUILD_ID: "${{github.run_number}}.0"
   BUILD_NAME: "cwr" # CWR - Curation Waiver Request 
   REPO_VIRTUAL: "cg-lab-npm" # "curation-blocked-npm-virtual"  # "curation-blocked-npm-remote" # "curation-blocked-npm-local"
+  REPO_REMOTE: "cg-lab-npm-remote"
 
 jobs:
   caBlockerFail: 
@@ -170,7 +171,7 @@ jobs:
               requested_at=$(echo "$latest_request" | jq -r '.requested_at')
               justification=$(echo "$latest_request" | jq -r '.justification')
 
-              if [[ ("${RT_REMOTE}" == "${repo_key}") ]] ; then
+              if [[ ("${{env.REPO_REMOTE}}" == "${repo_key}") ]] ; then
                 echo " |  ${waiver_id} | ${pkg_name} | ${pkg_version} | ${requested_at} | ${justification} | ${decision_owners} | " >> $GITHUB_STEP_SUMMARY
               fi
             done
