@@ -173,19 +173,19 @@ jobs:
 
               if [[ ("${{env.REPO_REMOTE}}" == "${repo_key}") ]] ; then
                 echo " |  ${waiver_id} | ${pkg_name} | ${pkg_version} | ${requested_at} | ${justification} | ${decision_owners} | " >> $GITHUB_STEP_SUMMARY
+
+                 echo "WAIVER_REQUEST_EXISTS=TRUE" >> $GITHUB_ENV
               fi
             done
             echo " " >> $GITHUB_STEP_SUMMARY
 
-        - name: "Exit"
-          run: |  
-            exit 1
-
         - name: "NPM Install"
+          if: ${{ env.WAIVER_REQUEST_EXISTS != 'TRUE' }}
           run: |  
               jf npm install --build-name=${{env.BUILD_NAME}} --build-number=${{env.BUILD_ID}}
 
         - name: "Build-Info"
+          if: ${{ env.WAIVER_REQUEST_EXISTS != 'TRUE' }}
           run: |
             jf rt bag ${BUILD_NAME} ${BUILD_ID} 
             jf rt bce ${BUILD_NAME} ${BUILD_ID}
